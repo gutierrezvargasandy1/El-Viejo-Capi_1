@@ -1,0 +1,79 @@
+# ============================================================
+#  .gitignore para Unity  -  El Viejo Capi V2
+# ============================================================
+
+# Carpetas que Unity regenera solo (NO se suben, pesan GB)
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Mm]emoryCaptures/
+/[Rr]ecordings/
+
+# Unity Version Control (Plastic) - se queda solo en tu PC
+.plastic/
+ignore.conf
+
+# Carpeta de recuperación de escenas
+/[Aa]ssets/_Recovery/
+/[Aa]ssets/_Recovery.meta
+
+# Asset Store tools
+/[Aa]ssets/AssetStoreTools*
+
+# Archivos de Visual Studio / Rider / VS Code
+.vs/
+.idea/
+.vscode/
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+
+# Metadatos de compilación
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+
+# Reportes de crash
+sysinfo.txt
+
+# Builds
+*.apk
+*.aab
+*.unitypackage
+*.app
+
+# Crashlytics / otros
+crashlytics-build.properties
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ============================================================
+#  Versiones de paquetes que NO usa este proyecto (es URP)
+#  Se quedan en tu PC, solo no se suben a GitHub (~3.9 GB)
+# ============================================================
+/Assets/StylArts/StylizedHouseInterior/BUILT-IN/
+/Assets/StylArts/StylizedHouseInterior/BUILT-IN.meta
+/Assets/Free Pack/HDRP/
+/Assets/Free Pack/HDRP.meta
+/Assets/Free Pack/scenes/HDRP_Demo.unity
+/Assets/Free Pack/scenes/HDRP_Demo.unity.meta
+/Assets/Free Pack/scenes/HDRP_Overview.unity
+/Assets/Free Pack/scenes/HDRP_Overview.unity.meta
