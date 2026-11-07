@@ -238,6 +238,6 @@ Este repositorio no tiene una licencia pública: todos los derechos del contenid
 
 <div align="center">
 
-Hecho con 🖤 en Guanajuato, México
+Hecho con 🖤 en Guanajuato, México ...
 
 </div>
