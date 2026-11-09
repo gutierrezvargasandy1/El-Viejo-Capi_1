@@ -12,6 +12,10 @@ public class MarionetaDeposito : MonoBehaviour
     [Tooltip("Déjalo vacío para usar este mismo objeto")]
     public GameObject marionetaEnSuLugar;
 
+    [Header("Sonido al dejar la marioneta")]
+    public AudioClip sonidoDejar;
+    [Range(0f, 1f)] public float volumen = 1f;
+
     [Header("Diagnóstico")]
     public bool mostrarDebug = true;
 
@@ -100,9 +104,31 @@ public class MarionetaDeposito : MonoBehaviour
         jugadorCerca = false;
         Ver(true);
 
+        ReproducirSonido();
+
         if (GestorPistas.instancia != null) GestorPistas.instancia.Ocultar();
 
         Collider c = GetComponent<Collider>();
         if (c != null) c.enabled = false;
+    }
+
+    // Se reproduce desde un objeto temporal para que nunca se corte,
+    // aunque este objeto o la marioneta se desactiven.
+    void ReproducirSonido()
+    {
+        if (sonidoDejar == null)
+        {
+            if (mostrarDebug) Debug.LogWarning("[Deposito] no tiene asignado el sonidoDejar.", this);
+            return;
+        }
+
+        GameObject temp = new GameObject("SonidoDejarMarioneta");
+        AudioSource fuente = temp.AddComponent<AudioSource>();
+        fuente.clip = sonidoDejar;
+        fuente.volume = volumen;
+        fuente.spatialBlend = 0f; // 2D
+        fuente.pitch = Random.Range(0.95f, 1.05f); // ligera variación entre marionetas
+        fuente.Play();
+        Destroy(temp, sonidoDejar.length / fuente.pitch + 0.1f);
     }
 }

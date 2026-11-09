@@ -406,8 +406,56 @@ MonoBehaviour:
   videos:
   - {fileID: 32900000, guid: 9ae87a312a37cad4fa5581a528d5793f, type: 3}
   - {fileID: 32900000, guid: c98915580d9d95845aa4fa3e5d12c3ec, type: 3}
-  pausaEntreVideos: 0
+  pausaEntreVideos: 1
+  ajustes:
+  - nombre: Teatro (show)
+    velocidad: 0.8
+    congelarAlFinal: 1.5
+    sonidoEntrada: {fileID: 8300000, guid: 85cb6da7bd4373b4faaa35da7347fc2e, type: 3}
+    volumenEntrada: 1
+    esperaEntrada: 3
+    ambiente: {fileID: 8300000, guid: 1e026cbf43c0d114f96cc02e4fac86c1, type: 3}
+    volumenAmbiente: 0.45
+    musica: {fileID: 8300000, guid: 93d6e9b61ce66d4489c614ef7ed4ba2d, type: 3}
+    volumenMusica: 0.28
+    eventos:
+    - descripcion: "Ta-d\xE1n del final del show"
+      segundo: -2.5
+      sonido: {fileID: 8300000, guid: 01ae8986c5a7cd249af7b9e1fc0632c7, type: 3}
+      volumen: 0.9
+  - nombre: Aplausos y guardar marionetas
+    velocidad: 0.8
+    congelarAlFinal: 2
+    sonidoEntrada: {fileID: 0}
+    volumenEntrada: 1
+    esperaEntrada: 0
+    ambiente: {fileID: 8300000, guid: 1e026cbf43c0d114f96cc02e4fac86c1, type: 3}
+    volumenAmbiente: 0.3
+    musica: {fileID: 0}
+    volumenMusica: 0.4
+    eventos:
+    - descripcion: "Aplausos del p\xFAblico"
+      segundo: 0
+      sonido: {fileID: 8300000, guid: b5403f66005c6f04bb6674bf12ee8ec3, type: 3}
+      volumen: 1
+    - descripcion: Click click de los broches
+      segundo: 5.6
+      sonido: {fileID: 8300000, guid: 752bfd9033ffcb34f8bc215287721706, type: 3}
+      volumen: 0.9
+    - descripcion: Abre la maleta
+      segundo: 6.5
+      sonido: {fileID: 8300000, guid: f8182fc7fa7017c4bb462b552d524cb6, type: 3}
+      volumen: 0.9
+    - descripcion: Guarda las marionetas
+      segundo: 10.8
+      sonido: {fileID: 8300000, guid: 8d929d7612abd454aacc0833bf4183b9, type: 3}
+      volumen: 0.85
+  duracionFade: 0.8
+  negroAlFinal: 1.5
   escenaSiguiente: Caminata en las Calles de Celaya Noche
+  alTerminar:
+    m_PersistentCalls:
+      m_Calls: []
   permitirSaltar: 1
 --- !u!328 &961739755
 VideoPlayer:

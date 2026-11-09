@@ -9,6 +9,10 @@ public class MarionetaRecolectable : MonoBehaviour
     [Header("Objeto a recoger (si lo dejas vacío, usa este mismo)")]
     public GameObject objeto;
 
+    [Header("Sonido al recoger")]
+    public AudioClip sonidoRecoger;
+    [Range(0f, 1f)] public float volumen = 1f;
+
     private bool jugadorCerca = false;
     private bool yaRecogida = false;
 
@@ -63,6 +67,8 @@ public class MarionetaRecolectable : MonoBehaviour
     {
         yaRecogida = true;
 
+        ReproducirSonido();
+
         if (GestorCanasta.instancia != null)
             GestorCanasta.instancia.Recolectar();
 
@@ -70,5 +76,21 @@ public class MarionetaRecolectable : MonoBehaviour
             GestorPistas.instancia.Ocultar();
 
         objeto.SetActive(false);
+    }
+
+    // Se reproduce desde un objeto temporal para que no se corte
+    // cuando la marioneta se desactiva.
+    void ReproducirSonido()
+    {
+        if (sonidoRecoger == null) return;
+
+        GameObject temp = new GameObject("SonidoRecoger");
+        AudioSource fuente = temp.AddComponent<AudioSource>();
+        fuente.clip = sonidoRecoger;
+        fuente.volume = volumen;
+        fuente.spatialBlend = 0f; // 2D: se oye en las manos del jugador
+        fuente.pitch = Random.Range(0.95f, 1.05f); // ligera variación entre marionetas
+        fuente.Play();
+        Destroy(temp, sonidoRecoger.length / fuente.pitch + 0.1f);
     }
 }

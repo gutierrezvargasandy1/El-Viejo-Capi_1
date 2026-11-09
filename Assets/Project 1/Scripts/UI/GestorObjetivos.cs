@@ -47,7 +47,7 @@ public class GestorObjetivos : MonoBehaviour
     public void MostrarObjetivo(string nuevoObjetivo)
     {
         if (textoObjetivo != null)
-            textoObjetivo.text = "Objetivo: " + nuevoObjetivo;
+            textoObjetivo.text =  nuevoObjetivo;
 
         // Sonido de nuevo objetivo
         if (sonidoObjetivo != null)
