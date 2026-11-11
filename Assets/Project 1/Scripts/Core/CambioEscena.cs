@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Collections;
 
 public class CambioEscena : MonoBehaviour
 {
@@ -9,6 +10,10 @@ public class CambioEscena : MonoBehaviour
     [Header("¿Requiere juntar todas las marionetas?")]
     public bool requiereMarionetas = true;
     public string mensajeFalta = "Aún te faltan marionetas";
+
+    [Header("Llamado desde un evento (ej. Al Comer)")]
+    [Tooltip("Segundos de espera antes de cambiar, para que termine el sonido")]
+    public float esperaDesdeEvento = 1.6f;
 
     private bool yaActivado = false;
 
@@ -24,23 +29,53 @@ public class CambioEscena : MonoBehaviour
             return;
         }
 
-        if (!Application.CanStreamedLevelBeLoaded(nombreEscena))
+        IrA(nombreEscena, 0f);
+    }
+
+    // ---- Para usar desde UnityEvents (aparecen en el menú del evento) ----
+
+    // Va a la escena escrita en el campo "Nombre Escena"
+    public void Cambiar()
+    {
+        IrA(nombreEscena, esperaDesdeEvento);
+    }
+
+    // Va a la escena que escribas en la cajita del evento
+    public void CambiarA(string escena)
+    {
+        IrA(escena, esperaDesdeEvento);
+    }
+
+    // ----------------------------------------------------------------------
+
+    void IrA(string escena, float espera)
+    {
+        if (yaActivado) return;
+
+        if (!Application.CanStreamedLevelBeLoaded(escena))
         {
-            Debug.LogError($"[CambioEscena] La escena '{nombreEscena}' no existe o no está en File > Build Profiles > Scene List.");
+            Debug.LogError($"[CambioEscena] La escena '{escena}' no existe o no está en File > Build Profiles > Scene List.", this);
             return;
         }
 
         yaActivado = true;
+        StartCoroutine(CargarDespues(escena, espera));
+    }
+
+    IEnumerator CargarDespues(string escena, float espera)
+    {
+        if (espera > 0f)
+            yield return new WaitForSecondsRealtime(espera);
 
         if (GestorTransicion.instancia != null)
         {
             // Con pantalla negra (también usa LoadScene por dentro)
-            GestorTransicion.instancia.CambiarEscena(nombreEscena);
+            GestorTransicion.instancia.CambiarEscena(escena);
         }
         else
         {
             // Sin gestor: carga normal directa
-            SceneManager.LoadScene(nombreEscena);
+            SceneManager.LoadScene(escena);
         }
     }
 

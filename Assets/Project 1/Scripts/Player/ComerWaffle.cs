@@ -14,6 +14,10 @@ public class ComerWaffle : MonoBehaviour
     public bool parpadearSiempre = true;
     public float velocidadParpadeo = 3f;
 
+    [Header("Sonido al comer")]
+    public AudioClip sonidoComer;
+    [Range(0f, 1f)] public float volumen = 1f;
+
     [Header("Qué pasa al comer (opcional)")]
     public UnityEvent alComer;
 
@@ -73,6 +77,8 @@ public class ComerWaffle : MonoBehaviour
     {
         yaComido = true;
 
+        ReproducirSonido();
+
         if (rendererWaffle != null)
             rendererWaffle.enabled = true;
 
@@ -89,5 +95,20 @@ public class ComerWaffle : MonoBehaviour
             GestorSecuencia.instancia.AvanzarFase();
 
         gameObject.SetActive(false);
+    }
+
+    // Se reproduce desde un objeto temporal para que no se corte
+    // cuando este GameObject se desactiva.
+    void ReproducirSonido()
+    {
+        if (sonidoComer == null) return;
+
+        GameObject temp = new GameObject("SonidoComer");
+        AudioSource fuente = temp.AddComponent<AudioSource>();
+        fuente.clip = sonidoComer;
+        fuente.volume = volumen;
+        fuente.spatialBlend = 0f; // 2D: se oye "en la boca" del jugador
+        fuente.Play();
+        Destroy(temp, sonidoComer.length + 0.1f);
     }
 }
