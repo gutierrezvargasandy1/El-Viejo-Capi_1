@@ -432,7 +432,7 @@ MonoBehaviour:
       bajarFondo: 0
   duracionFade: 0.8
   negroAlFinal: 2
-  escenaSiguiente: 
+  escenaSiguiente: HabitacionScene
   alTerminar:
     m_PersistentCalls:
       m_Calls: []

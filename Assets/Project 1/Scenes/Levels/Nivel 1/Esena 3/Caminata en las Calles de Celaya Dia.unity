@@ -2984,9 +2984,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c150fe6b61378034aa39b1879424d63a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GestorTransicion
+  config: {fileID: 0}
   pantallaNegra: {fileID: 1796154549}
-  duracionFade: 0.16
-  tiempoEnNegro: 3.75
+  contenido: {fileID: 0}
+  negro: {fileID: 0}
+  fondo: {fileID: 0}
+  ajusteFondo: {fileID: 0}
+  barraRelleno: {fileID: 0}
+  textoEtiqueta: {fileID: 0}
+  textoConsejo: {fileID: 0}
+  textoCargando: {fileID: 0}
+  textoPorcentaje: {fileID: 0}
 --- !u!4 &1444999700
 Transform:
   m_ObjectHideFlags: 0
@@ -4872,7 +4880,7 @@ Transform:
   m_GameObject: {fileID: 1927625054}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 11.49, y: -1.99837, z: -12.48}
+  m_LocalPosition: {x: 9.92, y: -1.99837, z: -12.48}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

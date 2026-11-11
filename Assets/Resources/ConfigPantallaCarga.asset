@@ -1,0 +1,66 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed4f8ac09bef5574ea8e71fb09297813, type: 3}
+  m_Name: ConfigPantallaCarga
+  m_EditorClassIdentifier: Assembly-CSharp::ConfigPantallaCarga
+  duracionFade: 1
+  tiempoMinimo: 4
+  cambiarTextoCada: 6
+  esperaAlLlegar100: 0.4
+  bajarVolumen: 1
+  musicaCarga: {fileID: 0}
+  volumenMusicaCarga: 0.4
+  reanudarTiempo: 1
+  imagenesFondo:
+  - {fileID: 21300000, guid: 12b2321aa59f90b4abb0509129676251, type: 3}
+  - {fileID: 21300000, guid: 6c6f014beb638674eb17fe6107e5ad7a, type: 3}
+  - {fileID: 21300000, guid: ff6e0e048471b3a41944914adc036c0b, type: 3}
+  zoomLento: 1
+  zoomMaximo: 1.08
+  colorFondo: {r: 0, g: 0, b: 0, a: 1}
+  fuente: {fileID: 0}
+  colorTexto: {r: 0.86, g: 0.82, b: 0.74, a: 1}
+  colorEtiqueta: {r: 0.72, g: 0.13, b: 0.1, a: 1}
+  colorBarraFondo: {r: 0.1, g: 0.08, b: 0.08, a: 1}
+  colorBarra: {r: 0.62, g: 0.09, b: 0.07, a: 1}
+  etiquetaConsejo: CONSEJO
+  etiquetaHistoria: LA LEYENDA DEL CAPI
+  textoCargando: Cargando
+  textos:
+  - esHistoria: 0
+    texto: "Junta todas las marionetas antes de salir de la casa. El Capi nunca da una funci\xF3n incompleta."
+  - esHistoria: 0
+    texto: Cuando veas "Presiona E", puedes interactuar con ese objeto.
+  - esHistoria: 0
+    texto: "Si no sabes qu\xE9 hacer, revisa el objetivo en pantalla."
+  - esHistoria: 0
+    texto: "Juega con aud\xEDfonos: muchos sustos se escuchan antes de verse."
+  - esHistoria: 0
+    texto: "Puedes saltar las cinem\xE1ticas con Espacio o Enter."
+  - esHistoria: 0
+    texto: Un buen desayuno es el inicio de un buen show.
+  - esHistoria: 1
+    texto: "Dicen en Celaya que el Viejo Capi lleg\xF3 con una maleta llena de marionetas. Nadie lo vio hacerlas, y nadie lo vio comprarlas."
+  - esHistoria: 1
+    texto: "Los cartoneros de Celaya juran que una de sus marionetas no es de cart\xF3n, y que pesa como alguien dormido."
+  - esHistoria: 1
+    texto: "Cada funci\xF3n del Capi termina con aplausos. Lo que nadie cuenta es qui\xE9n sigue aplaudiendo cuando la plaza ya est\xE1 vac\xEDa."
+  - esHistoria: 1
+    texto: El Capi cierra la maleta con tres cerrojos. No es para que nadie se las robe; es para que no salgan.
+  - esHistoria: 1
+    texto: "Los vecinos dicen que de noche se oyen pasos de madera en la casa del Capi, aunque \xE9l est\xE9 dormido."
+  - esHistoria: 1
+    texto: El Capi les habla a sus marionetas durante la cena. Eso no es lo raro. Lo raro es cuando una le contesta.
+  - esHistoria: 1
+    texto: "La puerta del cuarto del Capi tiene ara\xF1azos por fuera. \xC9l dice que es el gato. El Capi no tiene gato."
+  - esHistoria: 1
+    texto: Nunca dejes una marioneta mirando hacia tu cama.
