@@ -3642,7 +3642,7 @@ MonoBehaviour:
   sonidoJumpscare: {fileID: 8300000, guid: 3c8764a249a05a045829ebe26c3abc45, type: 3}
   volumenJumpscare: 1
   duracionJumpscare: 1
-  ambiente: {fileID: 8300000, guid: 427135b409089c846a2fdab832f83ae0, type: 3}
+  ambiente: {fileID: 8300000, guid: e678d583ec9b63f4293c4977a9f07b03, type: 3}
   volumenAmbiente: 0.5
   sonidoHora: {fileID: 8300000, guid: 30e259dd9a45c9c43b6a6c0f97df63e9, type: 3}
   sonidoVictoria: {fileID: 8300000, guid: 58730edad7e4c5f438fddfd48f76892f, type: 3}
