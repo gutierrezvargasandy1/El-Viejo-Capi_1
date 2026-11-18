@@ -54,6 +54,13 @@ public class EntradaMonstruo : MonoBehaviour
     public UnityEvent alAhuyentar;
     public UnityEvent alEntrar;
 
+    // Eventos para los efectos (temblor, polvo, chispas, sonidos...)
+    public static event System.Action<EntradaMonstruo> AlEmpezarAtaque;
+    public static event System.Action<EntradaMonstruo> AlAhuyentarlo;
+    public static event System.Action<EntradaMonstruo> AlMeterse;
+    /// <summary>Cada golpe, toquido o raspón fuerte (fuerza 0..1).</summary>
+    public static event System.Action<EntradaMonstruo, float> AlGolpe;
+
     public bool Atacando => atacando;
     public bool Disponible => !atacando && Time.time >= finEnfriamiento;
     public float Progreso => total > 0f ? 1f - restante / total : 0f;
@@ -61,6 +68,7 @@ public class EntradaMonstruo : MonoBehaviour
 
     bool atacando;
     float restante, total, defensa, finEnfriamiento;
+    float golpeAnterior, proximoGolpe;
     AudioSource fuenteLoop, fuenteUno;
     Quaternion rotPuerta;
     Vector3 posPuerta;
@@ -111,8 +119,10 @@ public class EntradaMonstruo : MonoBehaviour
             fuenteLoop.volume = volumenIntento * 0.5f;
             fuenteLoop.Play();
         }
-        if (monstruo != null) monstruo.Aparecer(desplazamientoInicial);
+        if (monstruo != null) monstruo.Aparecer(desplazamientoInicial, tipo);
+        proximoGolpe = Time.time + Random.Range(1.2f, 2.2f);
         alEmpezar.Invoke();
+        if (AlEmpezarAtaque != null) AlEmpezarAtaque(this);
     }
 
     void Update()
@@ -131,6 +141,19 @@ public class EntradaMonstruo : MonoBehaviour
         float p = Progreso;
         if (monstruo != null) monstruo.Acercar(p, Defensa01);
         fuenteLoop.volume = volumenIntento * Mathf.Lerp(0.5f, 1f, p);
+
+        // golpes para los efectos: la puerta con su empujón; ventana y chimenea cada tanto
+        float golpeAhora = Mathf.Pow(Mathf.Abs(Mathf.Sin(Time.time * 2.3f)), 8f);
+        if (tipo == TipoEntrada.Puerta)
+        {
+            if (golpeAhora > 0.8f && golpeAnterior <= 0.8f && AlGolpe != null) AlGolpe(this, Mathf.Lerp(0.5f, 1f, p));
+        }
+        else if (Time.time >= proximoGolpe)
+        {
+            proximoGolpe = Time.time + Random.Range(1.6f, 3.2f) * Mathf.Lerp(1f, 0.6f, p);
+            if (AlGolpe != null) AlGolpe(this, Mathf.Lerp(0.3f, 0.7f, p));
+        }
+        golpeAnterior = golpeAhora;
 
         if (puertaQueTiembla != null)
         {
@@ -176,12 +199,14 @@ public class EntradaMonstruo : MonoBehaviour
         if (monstruo != null) monstruo.Retirarse(desplazamientoInicial);
         finEnfriamiento = Time.time + enfriamiento;
         alAhuyentar.Invoke();
+        if (AlAhuyentarlo != null) AlAhuyentarlo(this);
     }
 
     void Entrar()
     {
         Terminar();
         alEntrar.Invoke();
+        if (AlMeterse != null) AlMeterse(this);
         if (GestorNoche.instancia != null) GestorNoche.instancia.MonstruoEntro(this);
     }
 
@@ -194,6 +219,22 @@ public class EntradaMonstruo : MonoBehaviour
         if (monstruo == null) return;
         if (retirarse) monstruo.Retirarse(desplazamientoInicial);
         else monstruo.Ocultar();
+    }
+
+    /// <summary>Dónde salen las partículas de esta entrada (polvo, hollín, chispas).</summary>
+    public Vector3 PuntoEfectos
+    {
+        get
+        {
+            switch (tipo)
+            {
+                case TipoEntrada.Puerta:
+                    return (puntoMirar != null ? puntoMirar.position : transform.position) + Vector3.up * 0.9f;
+                case TipoEntrada.Chimenea:
+                    return (fuego != null ? fuego.transform.position : transform.position) + Vector3.up * 0.85f;
+            }
+            return transform.position + Vector3.up * 1.9f;
+        }
     }
 
     public void OcultarMonstruo()

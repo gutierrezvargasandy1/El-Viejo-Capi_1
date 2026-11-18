@@ -21,11 +21,11 @@ EditorBuildSettings:
     path: Assets/Project 1/Scenes/Menus/LogotipoScene.unity
     guid: be988a35e702c4347b606ad946fadfb8
   - enabled: 1
-    path: Assets/Project 1/Scenes/Menus/MainMenu.unity
-    guid: eb75f330ce2d1e841a66230b3d427dea
-  - enabled: 1
     path: Assets/Project 1/Scenes/Menus/WarningScene.unity
     guid: 1026b2a3ac22b004d99ff90ee613caab
+  - enabled: 1
+    path: Assets/Project 1/Scenes/Menus/MainMenu.unity
+    guid: eb75f330ce2d1e841a66230b3d427dea
   - enabled: 1
     path: Assets/Project 1/Scenes/Levels/Nivel 1/Esenas 1/Esenas 1.unity
     guid: 477cee6b601e6f54584003cd33c4fc7d
