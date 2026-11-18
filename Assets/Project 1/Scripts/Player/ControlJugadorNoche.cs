@@ -40,8 +40,14 @@ public class ControlJugadorNoche : MonoBehaviour
     [Tooltip("Apaga el CinemachineBrain de la cámara para que no le gane el control")]
     public bool desactivarCinemachineBrain = true;
 
+    /// <summary>Lo llena EfectosNoche cada frame: temblor, respiración, sustos.</summary>
+    [HideInInspector] public Vector3 efectoPosicion;
+    [HideInInspector] public Vector3 efectoRotacion;
+
     public VistaNoche VistaActual => vistaActual != null ? vistaActual.tipo : VistaNoche.Cama;
     public bool EnTransicion => enTransicion;
+    /// <summary>A dónde va (si está caminando) o dónde está. Lo usa EfectosNoche para la respiración agitada.</summary>
+    public VistaNoche VistaHacia => enTransicion && destinoActual != null ? destinoActual.tipo : VistaActual;
     public bool Activo => activo;
     public PuntoVista Apuntando { get; private set; }
     /// <summary>Puede usar cortinas / fuego (está quieto en un punto).</summary>
@@ -49,7 +55,7 @@ public class ControlJugadorNoche : MonoBehaviour
     /// <summary>Puede usar la linterna (también mientras camina).</summary>
     public bool PuedeUsarObjetos => activo && !bloqueado && Time.timeScale > 0f;
 
-    PuntoVista vistaActual;
+    PuntoVista vistaActual, destinoActual;
     bool activo, bloqueado, enTransicion;
     float yaw, pitch, yawSuave, pitchSuave;
     AudioSource fuente;
@@ -90,6 +96,14 @@ public class ControlJugadorNoche : MonoBehaviour
         if (valor) Apuntando = null;
     }
 
+    // al salir de la escena (menú, ganar, otra escena) se regresa el cursor
+    void OnDestroy()
+    {
+        if (!activo) return;
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+    }
+
     void Update()
     {
         if (!activo || camara == null) return;
@@ -121,8 +135,8 @@ public class ControlJugadorNoche : MonoBehaviour
         Transform pose = vistaActual.Pose;
         float respiracion = Mathf.Sin(Time.time * 1.6f) * 0.006f;
         camara.transform.SetPositionAndRotation(
-            pose.position + Vector3.up * respiracion,
-            pose.rotation * Quaternion.Euler(pitchSuave, yawSuave, 0f));
+            pose.position + Vector3.up * respiracion + efectoPosicion,
+            pose.rotation * Quaternion.Euler(pitchSuave + efectoRotacion.x, yawSuave + efectoRotacion.y, efectoRotacion.z));
 
         // Clic para ir a un punto / volver a la cama
         Apuntando = null;
@@ -168,6 +182,7 @@ public class ControlJugadorNoche : MonoBehaviour
     IEnumerator Mover(PuntoVista destino, float duracion, bool caminar)
     {
         enTransicion = true;
+        destinoActual = destino;
         Apuntando = null;
 
         bool desdeCama = vistaActual == null || vistaActual.tipo == VistaNoche.Cama;
@@ -199,7 +214,7 @@ public class ControlJugadorNoche : MonoBehaviour
                 pos += Vector3.up * Mathf.Sin(x * Mathf.PI * 5f) * 0.02f * paso;           // balanceo de pasos
                 rot *= Quaternion.Euler(0f, 0f, Mathf.Sin(x * Mathf.PI * 2.5f) * 1.2f * paso);
             }
-            ct.SetPositionAndRotation(pos, rot);
+            ct.SetPositionAndRotation(pos + efectoPosicion, rot * Quaternion.Euler(efectoRotacion));
             yield return null;
         }
 

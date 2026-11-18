@@ -37,8 +37,16 @@ public class GestorNoche : MonoBehaviour
     };
     [Tooltip("Segundos que tienes para defender antes de que entre")]
     public float[] tiempoParaEntrar = { 14f, 12.5f, 11f, 10f, 9f, 8f };
-    [Tooltip("Cuántas entradas puede atacar al mismo tiempo")]
-    public int[] ataquesALaVez = { 1, 1, 1, 2, 2, 2 };
+    [Tooltip("Máximo de monstruos atacando al mismo tiempo (12, 1, 2, 3, 4 y 5 AM)")]
+    public int[] maxMonstruosJuntos = { 1, 1, 2, 2, 3, 3 };
+    [Tooltip("Probabilidad (0 a 1) de que lleguen 2 a la vez")]
+    public float[] probabilidadDoble = { 0f, 0.15f, 0.3f, 0.45f, 0.55f, 0.65f };
+    [Tooltip("Probabilidad (0 a 1) de que lleguen 3 a la vez (ventana, puerta y chimenea)")]
+    public float[] probabilidadTriple = { 0f, 0f, 0f, 0.1f, 0.2f, 0.3f };
+    [Tooltip("Segundos entre que aparece uno y el siguiente cuando llegan juntos")]
+    public Vector2 separacionEntreMonstruos = new Vector2(1.5f, 3.5f);
+    [Tooltip("Tiempo extra para defender cuando hay varios (0.25 = 25% más) para que sea difícil pero justo")]
+    [Range(0f, 1f)] public float tiempoExtraSiSonVarios = 0.25f;
 
     [Header("Referencias (las llena la herramienta)")]
     public ControlJugadorNoche jugador;
@@ -73,10 +81,28 @@ public class GestorNoche : MonoBehaviour
     public float esperaAlPerder = 3.5f;
     public UnityEvent alPerder;
 
+    [Header("Pantalla de GAME OVER")]
+    [Tooltip("La imagen del Game Over (la pone la herramienta: GameOver_Capi). Vacío = pantalla de texto 'TE ATRAPÓ'")]
+    public Texture imagenGameOver;
+    [Tooltip("Música deprimente que se repite mientras está la pantalla")]
+    public AudioClip musicaGameOver;
+    [Tooltip("Golpe grave cuando aparece la pantalla")]
+    public AudioClip golpeGameOver;
+    [Range(0f, 1f)] public float volumenMusicaGameOver = 0.85f;
+    [Tooltip("Segundos antes de que aparezca 'Intentar otra vez'")]
+    public float esperaParaContinuar = 3f;
+    [Tooltip("0 = espera a que presiones algo. Con segundos, vuelve a intentar solo")]
+    public float reintentarSoloDespuesDe = 0f;
+    [Tooltip("Escena del menú principal (Esc en el Game Over). Vacío = sin esa opción")]
+    public string escenaMenuPrincipal = "MainMenu";
+
     [Header("Otros")]
     public UnityEvent alIniciar;
-    [Tooltip("Solo en el editor: F1 ventana, F2 puerta, F3 chimenea, F4 adelantar a las 5:50 AM")]
+    [Tooltip("Solo en el editor: F1 ventana, F2 puerta, F3 chimenea, F4 adelantar a las 5:50 AM, F5 dos a la vez, F6 tres a la vez")]
     public bool teclasDePrueba = true;
+
+    /// <summary>Se llama al cambiar de hora (1 a 5). Lo usa EfectosNoche.</summary>
+    public static event System.Action<int> AlCambiarHora;
 
     public bool EnCurso => enCurso;
     public int Hora => hora;
@@ -166,8 +192,9 @@ public class GestorNoche : MonoBehaviour
                 StartCoroutine(Ganar());
                 return;
             }
-            ui.PonerHora(hora);
+            ui.AnunciarHora(hora);
             if (sonidoHora != null) fuente2D.PlayOneShot(sonidoHora, 0.8f);
+            if (AlCambiarHora != null) AlCambiarHora(hora);
         }
 
         ActualizarUI();
@@ -198,12 +225,45 @@ public class GestorNoche : MonoBehaviour
             else if (e.Disponible) libres.Add(e);
         }
 
-        if (activos >= Valor(ataquesALaVez, hora, 1) || libres.Count == 0) return;
-        if (libres.Count > 1) libres.Remove(ultima);   // que no repita la misma entrada seguido
+        int cupo = Valor(maxMonstruosJuntos, hora, 1) - activos;
+        if (cupo <= 0 || libres.Count == 0) return;
 
-        var elegida = libres[Random.Range(0, libres.Count)];
-        ultima = elegida;
-        elegida.IniciarAtaque(Valor(tiempoParaEntrar, hora, 10f));
+        // ¿cuántos llegan esta vez? (más tarde en la noche = más seguido llegan varios)
+        int cuantos = 1;
+        float r = Random.value;
+        float triple = Valor(probabilidadTriple, hora, 0f);
+        if (r < triple) cuantos = 3;
+        else if (r < triple + Valor(probabilidadDoble, hora, 0f)) cuantos = 2;
+        cuantos = Mathf.Min(Mathf.Min(cuantos, cupo), libres.Count);
+
+        if (libres.Count > cuantos) libres.Remove(ultima);   // que no repita la misma entrada seguido
+        LanzarVarios(libres, cuantos, activos + cuantos > 1);
+    }
+
+    // lanza 'cuantos' entradas de la lista: la primera ya, las demás unos segundos después
+    void LanzarVarios(List<EntradaMonstruo> libres, int cuantos, bool sonVarios)
+    {
+        float tiempoBase = Valor(tiempoParaEntrar, hora, 10f) * (sonVarios ? 1f + tiempoExtraSiSonVarios : 1f);
+        float espera = 0f;
+        for (int i = 0; i < cuantos && libres.Count > 0; i++)
+        {
+            var elegida = libres[Random.Range(0, libres.Count)];
+            libres.Remove(elegida);
+            ultima = elegida;
+            if (i == 0) elegida.IniciarAtaque(tiempoBase);
+            else
+            {
+                espera += Random.Range(separacionEntreMonstruos.x, separacionEntreMonstruos.y);
+                StartCoroutine(LanzarDespues(elegida, espera, tiempoBase));
+            }
+        }
+    }
+
+    IEnumerator LanzarDespues(EntradaMonstruo e, float espera, float duracion)
+    {
+        yield return new WaitForSeconds(espera);
+        if (!enCurso || e == null || e.Atacando || !e.Disponible) yield break;
+        e.IniciarAtaque(duracion);
     }
 
     void ActualizarUI()
@@ -274,6 +334,12 @@ public class GestorNoche : MonoBehaviour
                 case TipoEntrada.Chimenea: como = "Bajó por la chimenea"; break;
             }
         }
+        if (imagenGameOver != null)
+        {
+            yield return GameOver(como);
+            yield break;
+        }
+
         ui.MostrarFinal("TE ATRAPÓ", como, new Color(0.8f, 0.12f, 0.09f));
         alPerder.Invoke();
 
@@ -281,6 +347,85 @@ public class GestorNoche : MonoBehaviour
 
         if (reiniciarAlPerder)
             Cambiar(string.IsNullOrEmpty(escenaAlPerder) ? SceneManager.GetActiveScene().name : escenaAlPerder);
+    }
+
+    // Pantalla de GAME OVER con la imagen y la música; espera a que el jugador elija
+    IEnumerator GameOver(string como)
+    {
+        if (golpeGameOver != null) fuente2D.PlayOneShot(golpeGameOver, 1f);
+        AudioSource musica = null;
+        if (musicaGameOver != null)
+        {
+            musica = gameObject.AddComponent<AudioSource>();
+            musica.playOnAwake = false;
+            musica.loop = true;
+            musica.spatialBlend = 0f;
+            musica.volume = 0f;
+            musica.clip = musicaGameOver;
+            musica.Play();
+        }
+        yield return new WaitForSecondsRealtime(0.4f);
+        ui.MostrarGameOver(imagenGameOver, como);
+        alPerder.Invoke();
+
+        bool hayMenu = !string.IsNullOrEmpty(escenaMenuPrincipal) && Application.CanStreamedLevelBeLoaded(escenaMenuPrincipal);
+        float t = 0f;
+        bool puede = false;
+        int accion = 0;                  // 1 = otra vez, 2 = menú
+        while (accion == 0)
+        {
+            t += Time.unscaledDeltaTime;
+            if (musica != null)
+                musica.volume = Mathf.MoveTowards(musica.volume, volumenMusicaGameOver, Time.unscaledDeltaTime / 2.5f);
+
+            if (reiniciarAlPerder)
+            {
+                if (!puede && t >= esperaParaContinuar)
+                {
+                    puede = true;
+                    MostrarCursor();
+                    ui.PromptGameOver("[Clic / Espacio]  Intentar otra vez" + (hayMenu ? "      [Esc]  Menú principal" : ""));
+                }
+                if (puede)
+                {
+                    if (PresionoReintentar()) accion = 1;
+                    else if (hayMenu && PresionoMenu()) accion = 2;
+                }
+                if (reintentarSoloDespuesDe > 0f && t >= reintentarSoloDespuesDe) accion = 1;
+            }
+            yield return null;
+        }
+
+        ui.ElegidoGameOver();
+        MostrarCursor();                 // el menú necesita el cursor (en la noche estaba bloqueado)
+        if (accion == 2) Cambiar(escenaMenuPrincipal);
+        else Cambiar(string.IsNullOrEmpty(escenaAlPerder) ? SceneManager.GetActiveScene().name : escenaAlPerder);
+    }
+
+    static void MostrarCursor()
+    {
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+    }
+
+    static bool PresionoReintentar()
+    {
+        var kb = Keyboard.current;
+        if (kb != null && (kb.spaceKey.wasPressedThisFrame || kb.enterKey.wasPressedThisFrame || kb.rKey.wasPressedThisFrame)) return true;
+        var m = Mouse.current;
+        if (m != null && m.leftButton.wasPressedThisFrame) return true;
+        var g = Gamepad.current;
+        if (g != null && g.buttonSouth.wasPressedThisFrame) return true;
+        var ts = Touchscreen.current;
+        return ts != null && ts.primaryTouch.press.wasPressedThisFrame;
+    }
+
+    static bool PresionoMenu()
+    {
+        var kb = Keyboard.current;
+        if (kb != null && (kb.escapeKey.wasPressedThisFrame || kb.mKey.wasPressedThisFrame)) return true;   // en Android el botón Atrás es Escape
+        var g = Gamepad.current;
+        return g != null && g.buttonEast.wasPressedThisFrame;
     }
 
     IEnumerator Jumpscare(EntradaMonstruo culpable)
@@ -308,6 +453,7 @@ public class GestorNoche : MonoBehaviour
 
         if (sonidoJumpscare != null) fuente2D.PlayOneShot(sonidoJumpscare, volumenJumpscare);
         ui.FlashRojo();
+        if (EfectosNoche.instancia != null) EfectosNoche.instancia.EmpezarJumpscare();
 
         Transform ct = cam.transform;
 
@@ -348,6 +494,8 @@ public class GestorNoche : MonoBehaviour
         }
 
         ui.Negro(1f);
+        ui.Estatica(0.55f, 0.6f);
+        if (EfectosNoche.instancia != null) EfectosNoche.instancia.TerminarJumpscare();
         if (m != null) Destroy(m);
         Destroy(goLuz);
         ct.SetPositionAndRotation(posCam, rotCam);
@@ -407,6 +555,18 @@ public class GestorNoche : MonoBehaviour
         if (kb.f2Key.wasPressedThisFrame) ForzarAtaque(TipoEntrada.Puerta);
         if (kb.f3Key.wasPressedThisFrame) ForzarAtaque(TipoEntrada.Chimenea);
         if (kb.f4Key.wasPressedThisFrame) AdelantarA550();
+        if (kb.f5Key.wasPressedThisFrame) ForzarVarios(2);
+        if (kb.f6Key.wasPressedThisFrame) ForzarVarios(3);
+    }
+
+    /// <summary>Prueba: llegan varios monstruos a la vez por entradas distintas.</summary>
+    public void ForzarVarios(int cuantos)
+    {
+        if (!enCurso) return;
+        var libres = new List<EntradaMonstruo>();
+        foreach (var e in entradas)
+            if (e != null && e.isActiveAndEnabled && !e.Atacando) libres.Add(e);
+        LanzarVarios(libres, Mathf.Min(cuantos, libres.Count), true);
     }
 
     public void ForzarAtaque(TipoEntrada tipo)
@@ -420,6 +580,9 @@ public class GestorNoche : MonoBehaviour
     [ContextMenu("Probar: ataque por la VENTANA")] void ProbarVentana() => ForzarAtaque(TipoEntrada.Ventana);
     [ContextMenu("Probar: ataque por la PUERTA")] void ProbarPuerta() => ForzarAtaque(TipoEntrada.Puerta);
     [ContextMenu("Probar: ataque por la CHIMENEA")] void ProbarChimenea() => ForzarAtaque(TipoEntrada.Chimenea);
+
+    [ContextMenu("Probar: DOS a la vez")] void ProbarDos() => ForzarVarios(2);
+    [ContextMenu("Probar: TRES a la vez")] void ProbarTres() => ForzarVarios(3);
 
     [ContextMenu("Probar: adelantar a las 5:50 AM")]
     void AdelantarA550()
