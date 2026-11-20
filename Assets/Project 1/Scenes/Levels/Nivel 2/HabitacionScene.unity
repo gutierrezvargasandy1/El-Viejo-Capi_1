@@ -3710,6 +3710,8 @@ MonoBehaviour:
   sonidoHora: {fileID: 8300000, guid: 30e259dd9a45c9c43b6a6c0f97df63e9, type: 3}
   sonidoVictoria: {fileID: 8300000, guid: 58730edad7e4c5f438fddfd48f76892f, type: 3}
   escenaAlGanar: FinalJuegoScene
+  escenaFinalBueno: FinalBuenoScene
+  probabilidadFinalBueno: 0.5
   esperaAlGanar: 6
   alGanar:
     m_PersistentCalls:

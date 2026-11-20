@@ -69,8 +69,12 @@ public class GestorNoche : MonoBehaviour
     public AudioClip sonidoVictoria;
 
     [Header("Al ganar (6 AM)")]
-    [Tooltip("Escena a la que va al sobrevivir. Vacío = se queda aquí (usa el evento Al Ganar)")]
+    [Tooltip("Escena del FINAL MALO. Vacío = se queda aquí (usa el evento Al Ganar)")]
     public string escenaAlGanar = "";
+    [Tooltip("Escena del FINAL BUENO. Vacío = siempre sale el final malo")]
+    public string escenaFinalBueno = "";
+    [Tooltip("Probabilidad (0 a 1) de que salga el final bueno al ganar")]
+    [Range(0f, 1f)] public float probabilidadFinalBueno = 0.5f;
     public float esperaAlGanar = 6f;
     public UnityEvent alGanar;
 
@@ -98,7 +102,7 @@ public class GestorNoche : MonoBehaviour
 
     [Header("Otros")]
     public UnityEvent alIniciar;
-    [Tooltip("Solo en el editor: F1 ventana, F2 puerta, F3 chimenea, F4 adelantar a las 5:50 AM, F5 dos a la vez, F6 tres a la vez")]
+    [Tooltip("Pruebas (en el editor y en Development Build): F1 ventana, F2 puerta, F3 chimenea, F4 adelantar a las 5:50 AM, F5 dos a la vez, F6 tres a la vez, F7 ganar con final bueno, F8 ganar con final malo")]
     public bool teclasDePrueba = true;
 
     /// <summary>Se llama al cambiar de hora (1 a 5). Lo usa EfectosNoche.</summary>
@@ -533,8 +537,34 @@ public class GestorNoche : MonoBehaviour
         alGanar.Invoke();
         yield return new WaitForSeconds(Mathf.Max(0f, esperaAlGanar - 2f));
 
-        if (!string.IsNullOrEmpty(escenaAlGanar)) Cambiar(escenaAlGanar);
+        string destino = ElegirFinal();
+        if (!string.IsNullOrEmpty(destino)) Cambiar(destino);
     }
+
+    // 0 = al azar, 1 = bueno, 2 = malo (las teclas de prueba lo fuerzan)
+    int finalForzado;
+
+    string ElegirFinal()
+    {
+        bool hayBueno = !string.IsNullOrEmpty(escenaFinalBueno);
+        bool bueno;
+        if (finalForzado == 1) bueno = true;
+        else if (finalForzado == 2) bueno = false;
+        else bueno = Random.value < probabilidadFinalBueno;
+        if (bueno && hayBueno) return escenaFinalBueno;
+        return escenaAlGanar;
+    }
+
+    /// <summary>Prueba: gana la noche ya mismo con el final que digas.</summary>
+    public void GanarCon(bool finalBueno)
+    {
+        if (!enCurso) return;
+        finalForzado = finalBueno ? 1 : 2;
+        tiempo = segundosPorHora * 6f;          // en el siguiente cuadro son las 6 AM
+    }
+
+    [ContextMenu("Probar: ganar con FINAL BUENO")] void ProbarFinalBueno() => GanarCon(true);
+    [ContextMenu("Probar: ganar con FINAL MALO")] void ProbarFinalMalo() => GanarCon(false);
 
     // Usa el mismo cambio de escena de siempre
     void Cambiar(string escena)
@@ -548,7 +578,7 @@ public class GestorNoche : MonoBehaviour
 
     void PruebasEditor()
     {
-        if (!teclasDePrueba || !Application.isEditor) return;
+        if (!teclasDePrueba || !(Application.isEditor || Debug.isDebugBuild)) return;
         var kb = Keyboard.current;
         if (kb == null) return;
         if (kb.f1Key.wasPressedThisFrame) ForzarAtaque(TipoEntrada.Ventana);
@@ -557,6 +587,8 @@ public class GestorNoche : MonoBehaviour
         if (kb.f4Key.wasPressedThisFrame) AdelantarA550();
         if (kb.f5Key.wasPressedThisFrame) ForzarVarios(2);
         if (kb.f6Key.wasPressedThisFrame) ForzarVarios(3);
+        if (kb.f7Key.wasPressedThisFrame) GanarCon(true);     // gana y sale el FINAL BUENO
+        if (kb.f8Key.wasPressedThisFrame) GanarCon(false);    // gana y sale el FINAL MALO
     }
 
     /// <summary>Prueba: llegan varios monstruos a la vez por entradas distintas.</summary>
