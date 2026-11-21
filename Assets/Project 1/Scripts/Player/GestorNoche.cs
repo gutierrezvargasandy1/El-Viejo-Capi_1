@@ -109,6 +109,8 @@ public class GestorNoche : MonoBehaviour
     public static event System.Action<int> AlCambiarHora;
 
     public bool EnCurso => enCurso;
+    /// <summary>true mientras se ve la pantalla de GAME OVER (los controles del celular muestran el botón MENÚ).</summary>
+    public bool EnGameOver { get; private set; }
     public int Hora => hora;
 
     bool enCurso, terminado;
@@ -356,6 +358,7 @@ public class GestorNoche : MonoBehaviour
     // Pantalla de GAME OVER con la imagen y la música; espera a que el jugador elija
     IEnumerator GameOver(string como)
     {
+        EnGameOver = true;
         if (golpeGameOver != null) fuente2D.PlayOneShot(golpeGameOver, 1f);
         AudioSource musica = null;
         if (musicaGameOver != null)
@@ -420,6 +423,7 @@ public class GestorNoche : MonoBehaviour
         if (m != null && m.leftButton.wasPressedThisFrame) return true;
         var g = Gamepad.current;
         if (g != null && g.buttonSouth.wasPressedThisFrame) return true;
+        if (ControlesTactiles.Activo) return false;   // en el celular el toque llega como clic (y así el botón MENÚ no cuenta como "otra vez")
         var ts = Touchscreen.current;
         return ts != null && ts.primaryTouch.press.wasPressedThisFrame;
     }
@@ -434,6 +438,9 @@ public class GestorNoche : MonoBehaviour
 
     IEnumerator Jumpscare(EntradaMonstruo culpable)
     {
+#if UNITY_ANDROID || UNITY_IOS
+        if (!Application.isEditor) Handheld.Vibrate();   // en el celular, el susto también se siente
+#endif
         Camera cam = jugador != null && jugador.camara != null ? jugador.camara : Camera.main;
         if (culpable != null) culpable.OcultarMonstruo();
         if (cam == null) yield break;
