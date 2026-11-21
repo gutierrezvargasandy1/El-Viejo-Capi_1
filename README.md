@@ -35,7 +35,7 @@ Cada capítulo empieza con su título en pantalla.
 | 1 | **Un día normal** | `Esenas 1` | El Capi despierta, desayuna, junta sus marionetas y recorre Celaya de día y de noche. |
 | 2 | **Cada una en su lugar** | `Esena 2 Noche` | Regresa a casa de noche, guarda las marionetas, cena y se va a dormir. |
 | 3 | **Sobrevive** | `HabitacionScene` | La noche: algo intenta entrar. Hay que aguantar hasta las 6 AM. |
-| 4 | **El final** | `FinalJuegoScene` | Cinemática final (mal final). |
+| 4 | **El final** | `FinalJuegoScene` / `FinalBuenoScene` | Al ganar la noche sale **al azar** uno de los dos finales: la cinemática del mal final, o el final bueno en el bosque (enterrar las marionetas). |
 
 ---
 
@@ -91,6 +91,25 @@ Agrega tus capturas en una carpeta docs/screenshots/ y descomenta estas líneas:
 | Game Over: menú principal | `Esc` (en Android: botón Atrás) |
 | Pantalla de FIN: volver al menú | `Clic` / `Espacio` |
 
+### 📱 En el celular (Android)
+
+Los controles táctiles aparecen solos en el teléfono; en la PC no se ven.
+
+| Acción | En el celular |
+|---|---|
+| Moverse | Joystick (lado izquierdo de la pantalla; aparece donde pones el dedo) |
+| Correr | Sacar el dedo más allá del círculo del joystick |
+| Mirar | Arrastrar el dedo en el resto de la pantalla |
+| Interactuar (`E`) | Botón **USAR** |
+| Saltar | Botón **SALTAR** |
+| La noche: ir a la ventana / chimenea | Apuntar y **tocar** la pantalla |
+| La noche: linterna / cortinas y fuego / volver a la cama | Botones **LINTERNA** / **ACCIÓN** / **VOLVER** |
+| Saltar cinemática | Botón **OMITIR** |
+| Pausa | Botón **II** o el botón Atrás |
+| Game Over | Tocar = intentar otra vez · Botón **MENÚ** |
+
+Los textos como *"Presiona E"* cambian solos a *"Toca USAR"*. En el jumpscare el teléfono vibra.
+
 > Todos los controles usan el **nuevo Input System** de Unity.
 
 ---
@@ -134,8 +153,14 @@ Agrega tus capturas en una carpeta docs/screenshots/ y descomenta estas líneas:
 - **Jumpscare** y pantalla de **Game Over** con imagen propia y música.
 
 **El final (capítulo 4)**
-- **Cinemática final** en video, con sonido hecho a la medida y efectos encima: la imagen tiembla con cada golpe y late con el corazón del Capi.
-- **Pantalla de FIN** (mal final) y regreso al menú principal.
+- Al ganar la noche sale **al azar el final malo o el final bueno** (la probabilidad se ajusta en la herramienta).
+- **Final malo:** cinemática en video, con sonido hecho a la medida y efectos encima: la imagen tiembla con cada golpe y late con el corazón del Capi.
+- **Final bueno:** en el bosque y en primera persona. Tomar la pala, cavar un hoyo, echar las cinco marionetas y enterrarlas; amanece y aparece *"FINAL BUENO — La pesadilla terminó."*
+
+**Celular (Android)**
+- **Controles táctiles automáticos**: joystick, arrastrar para mirar, tocar para dar clic y botones que cambian según la escena.
+- Funcionan con un teclado y un mouse "virtuales", así que los scripts del juego no cambian.
+- Pantalla horizontal, respeta el notch, 60 FPS, vibración en el jumpscare, y texturas y audios más ligeros solo para Android.
 
 **Ambientación**
 - Versiones de día y de noche de las escenas, faroles que parpadean, fuego, pasos que cambian de tono al correr y un leve efecto de respiración en la cámara.
@@ -190,7 +215,15 @@ git lfs pull
 
 ### Compilar
 
-`File` → `Build Profiles` → elige tu plataforma → **Build**. Las escenas del juego ya están agregadas. La escena final la agrega la herramienta **Capítulos y final** (ver abajo).
+`File` → `Build Profiles` → elige tu plataforma → **Build**. Las escenas del juego ya están agregadas. Las escenas finales las agrega la herramienta **Capítulos y final** (ver abajo).
+
+### Compilar para Android
+
+1. En **Unity Hub** agrega el módulo **Android Build Support** (con *OpenJDK* y *Android SDK & NDK Tools*).
+2. En Unity: **Herramientas → Celular (Android)** → **Preparar para Android** → **Cambiar a Android**.
+3. **Crear el APK** (queda en `Builds/Android/ElViejoCapi.apk`) o **Crear el APK e instalarlo** con el celular conectado por USB (con *Depuración USB* activada).
+
+> Para probar los controles en la PC: `Window → General → Device Simulator`, escoge un celular y presiona **Play**.
 
 ---
 
@@ -211,7 +244,8 @@ En el orden en que se juegan:
 | 2 | Escena 2 (noche) | `Assets/Project 1/Scenes/Levels/Nivel 1/Esena 2/Esena 2 Noche.unity` |
 | 2 | Cinemática: el Capi se duerme | `Assets/Project 1/Scenes/Levels/Nivel 1/Esena 2/Cinematica Dormir Capi.unity` |
 | 3 | La noche (habitación) | `Assets/Project 1/Scenes/Levels/Nivel 2/HabitacionScene.unity` |
-| 4 | El final | `Assets/Project 1/Scenes/Levels/Nivel 2/FinalJuegoScene.unity` |
+| 4 | Final malo | `Assets/Project 1/Scenes/Levels/Nivel 2/FinalJuegoScene.unity` |
+| 4 | Final bueno (bosque) | `Assets/Project 1/Scenes/Levels/Nivel 2/FinalBuenoScene.unity` |
 
 ---
 
@@ -277,6 +311,8 @@ ProjectSettings/                # Configuración del proyecto
 | `EfectosNoche` | Efectos dinámicos: post-procesado, temblor de cámara, latido, respiración, estática, relámpagos, partículas y sustos. |
 | `UINoche` | HUD de la noche (hora, pila, leña, pistas) y pantalla de Game Over. |
 | `CinematicaFinal` | Reproduce la cinemática final con su sonido sincronizado y efectos, y muestra la pantalla de FIN. |
+| `FinalBueno` | El final bueno en el bosque: tomar la pala, cavar, echar las marionetas, enterrarlas y la pantalla de FINAL BUENO. |
+| `ControlesTactiles` | Controles del celular: joystick, mirar, tocar = clic y botones según la escena; cambia los textos de teclado por los de los botones. |
 
 ### Herramientas del editor
 
@@ -286,7 +322,8 @@ Todas están en el menú **Herramientas** de Unity:
 |---|---|
 | **Pantalla de Carga** | Crea la configuración, carga los fondos e instala la pantalla de carga en las escenas. |
 | **Noche (Sobrevive hasta las 6 AM)** | Arma la noche: usa tu propio monstruo, agrega los efectos dinámicos, asigna los sonidos, aplica la animación de asomarse y deja solo la cabeza en la chimenea. |
-| **Capítulos y final** | Pone el título de cada capítulo en su escena y arma la escena final (botón **HACER TODO**). |
+| **Capítulos y final** | Pone el título de cada capítulo en su escena y arma los dos finales: el malo y el bueno en el bosque (botón **HACER TODO**). |
+| **Celular (Android)** | Deja el proyecto listo para Android (pantalla horizontal, IL2CPP ARM64, texturas y audios ligeros) y crea el APK. |
 | **Voltear normales del seleccionado** | Hace que la luz ilumine las cortinas por los dos lados. |
 
 ### Atajos de prueba (solo en el editor, durante la noche)
@@ -296,6 +333,7 @@ Todas están en el menú **Herramientas** de Unity:
 | `F1` / `F2` / `F3` | El monstruo ataca la ventana / la puerta / la chimenea |
 | `F4` | Adelanta el reloj a las 5:50 AM |
 | `F5` / `F6` | Llegan dos / tres monstruos a la vez |
+| `F7` / `F8` | Gana la noche y sale el final bueno / el final malo |
 
 ---
 
@@ -325,6 +363,8 @@ Borra ese archivo para empezar desde cero.
 - [x] Monstruo final integrado
 - [x] Efectos dinámicos, jumpscare y Game Over
 - [x] Capítulo 4: cinemática final y pantalla de FIN
+- [x] Final bueno en el bosque (sale al azar al ganar la noche)
+- [x] Versión para celular Android con controles táctiles
 - [ ] Correcciones de menús
 - [ ] Capítulos 1 y 2 jugables, con audio
 
